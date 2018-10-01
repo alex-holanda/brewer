@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	xmlns:brewer="http://brewer.algaworks.com"
+	layout:decorate="~{layout/LayoutPadrao}">
+
+<head>
+	<link rel="stylesheet" type="text/css" th:href="@{/stylesheets/vendors/bootstrap-switch.min.css}"/>
+</head>
+
+<body>
+
+<section layout:fragment="conteudo">
+	<div class="page-header">
+		<div class="container-fluid">
+		<div class="row">
+			<div class="col-xs-10">
+				<h1>Cadastro de usuário</h1>
+			</div>
+			<div class="col-xs-2">
+				<div class="aw-page-header-controls">
+					<a class="btn btn-default" th:href="@{/usuarios}">
+						<i class="glyphicon  glyphicon-search"></i> <span class="hidden-xs hidden-sm">Pesquisar</span>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+	</div>
+	<div class="container-fluid">
+		
+		<form method="post" th:action="@{/usuarios/novo}" th:object="${usuario}" class="form-vertical  js-form-loading">
+			
+			<brewer:message />
+			
+			<!-- CAMPO NOME -->
+			<div class="row">
+				<div class="col-sm-9  form-group  bw-required" brewer:classforerror="nome">
+					<label class="control-label" for="nome">Nome</label>
+					<input type="text" id="nome" class="form-control" th:field="*{nome}"/>
+				</div>
+			</div>
+			
+			<!-- CAMPOS E-MAIL, DATA DE NASCIMENTO -->
+			<div class="row">
+				<div class="col-sm-6  form-group  bw-required" brewer:classforerror="email">
+					<label class="control-label" for="email">E-mail</label>
+					<input type="text" id="email" class="form-control" th:field="*{email}"/>
+				</div>
+				
+				<div class="col-sm-3  form-group  bw-required" brewer:classforerror="dataNascimento">
+					<label class="control-label" for="dtNascimento">Data de nascimento</label>
+					<input type="text" id="dtNascimento" class="form-control  js-date" th:field="*{dataNascimento}"
+						autocomplete="off"/>
+				</div>
+			</div>
+			
+			<!-- CAMPOS SENHA, CONFIRMAÇÃO DE SENHA E STATUS -->
+			<div class="row">
+				<div class="col-sm-3  form-group" brewer:classforerror="senha" th:classappend="${usuario.novo} ? bw-required">
+					<label class="control-label" for="senha">Senha</label>
+					<input type="password" id="senha" class="form-control" th:field="*{senha}"/>
+				</div>
+				
+				<div class="col-sm-3  form-group" brewer:classforerror="confirmacaoSenha">
+					<label class="control-label" for="confirmarSenha">Confirmar senha</label>
+					<input type="password" id="confirmarSenha" class="form-control" th:field="*{confirmacaoSenha}"/>
+				</div>
+				
+				<div class="col-sm-3  form-group">
+					<label>Status</label>
+					<div>
+						<div>
+							<input type="checkbox" class="js-status" data-size="small" data-off-color="danger" 
+								data-on-text="Ativo" data-off-text="Inativo" th:field="*{ativo}"/>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<!-- CAMPO GRUPOS -->
+			<div class="row">
+				<div class="col-sm-3  form-group  bw-required" brewer:classforerror="grupos">
+					<label class="control-label">Grupo</label>
+					<div>
+						<th:bloack th:each="grupo : ${grupos}">
+							<div class="checkbox checkbox-inline" >
+								<input type="checkbox" th:value="${grupo.codigo}" th:field="*{grupos}"/>
+								<label th:for="${#ids.prev('grupos')}" th:text="${grupo.nome}"></label>
+							</div>
+						</th:bloack>
+					</div>
+				</div>
+			</div>
+			
+			<div class="form-group">
+				<button class="btn  btn-primary" type="submit">Salvar</button>
+			</div>
+		</form>
+	</div>
+</section>
+
+<th:block layout:fragment="javascript-extra">
+	<script th:src="@{/javascripts/vendors/bootstrap-switch.min.js}"></script>
+	
+	<script>
+		$('.js-status').bootstrapSwitch();
+	</script>
+</th:block>
+</body>
+</html>

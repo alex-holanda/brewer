@@ -1,0 +1,14 @@
+package com.algaworks.brewer.repository.helper.estilo;
+
+import org.springframework.data.domain.Pageable;
+
+import org.springframework.data.domain.Page;
+
+import com.algaworks.brewer.model.Estilo;
+import com.algaworks.brewer.repository.filter.EstiloFilter;
+
+public interface EstilosQueries {
+	
+	public Page<Estilo> filtrar(EstiloFilter filter, Pageable pageable);
+
+}

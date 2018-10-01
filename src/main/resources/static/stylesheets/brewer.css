@@ -1,0 +1,168 @@
+/*
+##########################
+#COMPONETES
+##########################
+*/
+
+/* Field Action */
+.bw-field-action {
+	display: flex;
+}
+
+.bw-field-action__icon {
+	margin:6px 0 0 5px;
+}
+
+/*
+##########################
+#UTILIDADES
+##########################
+*/
+
+.bw-glyphicon-large {
+ font-size: 18px;	
+}
+
+.bw-required > .control-label:after {
+	content: "*";
+}
+
+/*
+##########################
+#Centralizar Modal
+##########################
+*/
+
+.modal {
+  text-align: center;
+  padding: 0!important;
+}
+
+.modal:before {
+  content: '';
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  margin-right: -4px;
+}
+
+.modal-dialog {
+  display: inline-block;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/*
+##########################
+#Upload
+##########################
+*/
+.bw-upload {
+	padding: 15px;
+	
+	border: 1px dashed #ddd;
+	border-radius: 4px;
+	background: #fafafa;
+	
+	text-align: center;
+}
+
+.bw-upload-form-file {
+	display: inline-block;
+	vertical-align: middle;
+	position: relative;
+	overflow: hidden;
+	margin-bottom: 1px;
+}
+
+.bw-upload-form-file > input[type=file] {
+	position: absolute;
+	top: 0px;
+	left: 0;
+	z-index: 1;
+	width: 100%;
+	opacity: 0;
+	cursor: pointer;
+	
+	font-size: 500px;
+}
+
+/*
+##########################
+#PÁGINAS DO SISTEMA
+##########################
+*/
+
+.bw-tabela-simples table tr th {
+	border-bottom-widht: 1px;
+}
+
+.bw-tabela-simples table tr td {
+	border-top: none;
+	border-bottom: 1px solid #e7eaec;
+	padding: 10px;
+	vertical-align: midle;
+}
+
+/* Colunas - Pesquisa de Cervejas */
+.table-cervejas-col-foto {
+	min-width: 50px;
+	width: 50px;
+}
+
+.table-cervejas-col-sku {
+	width: 90px;
+	text-align: center;
+}
+
+.table-cervejas-col-nome {
+	
+}
+
+.table-cervejas-col-estilo {
+	width: 120px;
+}
+
+.table-cervejas-col-origem {
+	width: 100px;
+}
+
+.table-cervejas-col-valor {
+	width: 100px;
+	text-align: right;
+}
+
+/* Colunas - Pesquisa de Clientes */
+.table-clientes-col-nome {
+}
+
+.table-clientes-col-tipo-pessoa {
+	width: 120px;
+	text-align: center;
+}
+
+.table-clientes-col-cpf-cnpj {
+	whidth: 140px;
+	text-align: right;
+}
+
+.table-clientes-col-telefone {
+	width: 140px;
+	text-align: right;
+}
+
+.table-clientes-col-cidade-estado {
+	whidth: 140px;
+	text-align: right;
+}
+
+/*
+######################################
+# CUSTOMIZAÇÃO DE COMPONENTES
+######################################
+*/
+
+.checkbox input[type="checkbox"]:checked + input + label::after {
+    font-family: 'FontAwesome';
+    content: "\f00c"; 
+}
