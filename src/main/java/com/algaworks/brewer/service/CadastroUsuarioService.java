@@ -53,10 +53,16 @@ public class CadastroUsuarioService {
 	}
 
 	public List<Grupo> grupos() {
+		
 		return grupos.findAll();
 	}
 
 	public Page<Usuario> filtrar(UsuarioFilter usuarioFilter, Pageable pageable) {
 		return usuarios.filtrar(usuarioFilter, pageable);
+	}
+
+	@Transactional
+	public void alterarStatus(Long[] codigos, StatusUsuario statusUsuario) {
+		statusUsuario.executar(codigos, usuarios);
 	}
 }

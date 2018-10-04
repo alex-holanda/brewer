@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -30,6 +31,85 @@ public class UsuariosImpl implements UsuariosQueries {
 
 	@PersistenceContext
 	private EntityManager manager;
+	
+	@Override
+	@Transactional(readOnly = true)
+	public Page<Usuario> filtrar(UsuarioFilter filtro, Pageable pageable) {
+		System.out.println(">>> Consulta que deveria carregar os grupos");
+		
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<Usuario> criteria = builder.createQuery(Usuario.class);
+		Root<Usuario> root = criteria.from(Usuario.class);
+		
+		root.fetch("grupos");
+		
+		Predicate[] predicates = criarRestricoes(filtro, builder, root);
+		criteria.where(predicates);
+		
+		TypedQuery<Usuario> query = manager.createQuery(criteria);
+		adicionarRestricoesDePagina(query, pageable);
+		
+		
+		
+		return new PageImpl<>(query.getResultList(), pageable, total(filtro));
+	}
+
+	private Long total(UsuarioFilter filtro) {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+		Root<Usuario> root = criteria.from(Usuario.class);
+		
+		Predicate[] predicates = criarRestricoes(filtro, builder, root);
+		criteria.where(predicates);
+		
+		criteria.select(builder.count(root));
+		
+		return manager.createQuery(criteria).getSingleResult();
+	}
+
+	private void adicionarRestricoesDePagina(TypedQuery<Usuario> query, Pageable pageable) {
+		int paginaAtual = pageable.getPageNumber();
+		int totalRegistros = pageable.getPageSize();
+		int primeiroRegistro = paginaAtual * totalRegistros;
+		
+		query.setFirstResult(primeiroRegistro);
+		query.setMaxResults(totalRegistros);
+		
+	}
+
+	private Predicate[] criarRestricoes(UsuarioFilter filtro, CriteriaBuilder builder, Root<Usuario> root) {
+
+		List<Predicate> predicates = new ArrayList<>();
+		
+		if (filtro != null) {
+			
+			if (!StringUtils.isEmpty(filtro.getNome())) {
+				predicates.add(builder.like(root.get(Usuario_.nome), "%" + filtro.getNome() + "%"));
+			}
+			
+			if (!StringUtils.isEmpty(filtro.getEmail())) {
+				predicates.add(builder.like(root.get(Usuario_.email), "%" + filtro.getEmail() + "%"));
+			}
+			
+			if (filtro.getGrupos() != null && !filtro.getGrupos().isEmpty()) {
+				System.out.println(">>> Fitro no grupo");
+				
+				Join<Usuario, Grupo> join = root.join("grupos");
+				Path<Long> campoGrupoId = join.get("codigo");
+				
+				for (Long codigo : filtro.getGrupos().stream().mapToLong(Grupo::getCodigo).toArray()) {
+				
+					predicates.add(builder.isTrue(campoGrupoId.in(codigo)));
+					
+				}
+				
+			}
+
+		}
+		
+		return predicates.toArray(new Predicate[predicates.size()]);
+	}
+
 	
 	@Override
 	public Optional<Usuario> porEmailEAtivo(String email) {
@@ -74,65 +154,4 @@ public class UsuariosImpl implements UsuariosQueries {
 //				.setParameter("usuario", usuario)
 //				.getResultList();
 	}
-
-	@Override
-	@Transactional(readOnly = true)
-	public Page<Usuario> filtrar(UsuarioFilter filtro, Pageable pageable) {
-		
-		CriteriaBuilder builder = manager.getCriteriaBuilder();
-		CriteriaQuery<Usuario> criteria = builder.createQuery(Usuario.class);
-		Root<Usuario> root = criteria.from(Usuario.class);
-		
-		Predicate[] predicates = criarRestricoes(filtro, builder, root);
-		
-		criteria.where(predicates);
-		
-		
-		TypedQuery<Usuario> query = manager.createQuery(criteria);
-		adicionarRestricoesDePagina(query, pageable);
-		
-		return new PageImpl<>(query.getResultList(), pageable, total(filtro));
-	}
-
-	private Long total(UsuarioFilter filtro) {
-		CriteriaBuilder builder = manager.getCriteriaBuilder();
-		CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
-		Root<Usuario> root = criteria.from(Usuario.class);
-		
-		Predicate[] predicates = criarRestricoes(filtro, builder, root);
-		criteria.where(predicates);
-		
-		criteria.select(builder.count(root));
-		
-		return manager.createQuery(criteria).getSingleResult();
-	}
-
-	private void adicionarRestricoesDePagina(TypedQuery<Usuario> query, Pageable pageable) {
-		int paginaAtual = pageable.getPageNumber();
-		int totalRegistros = pageable.getPageSize();
-		int primeiroRegistro = paginaAtual * totalRegistros;
-		
-		query.setFirstResult(primeiroRegistro);
-		query.setMaxResults(totalRegistros);
-		
-	}
-
-	private Predicate[] criarRestricoes(UsuarioFilter filtro, CriteriaBuilder builder, Root<Usuario> root) {
-
-		List<Predicate> predicates = new ArrayList<>();
-		
-		if (filtro != null) {
-			
-			if (!StringUtils.isEmpty(filtro.getNome())) {
-				predicates.add(builder.like(root.get("nome"), "%" + filtro.getNome() + "%"));
-			}
-			
-			if (!StringUtils.isEmpty(filtro.getEmail())) {
-				predicates.add(builder.like(root.get("email"), "%" + filtro.getEmail() + "%"));
-			}
-		}
-		
-		return predicates.toArray(new Predicate[predicates.size()]);
-	}
-
 }

@@ -156,6 +156,11 @@
 	text-align: right;
 }
 
+.table-usuarios-col-status-checkbox {
+	width: 28px;
+	text-align: center;
+}
+
 /*
 ######################################
 # CUSTOMIZAÇÃO DE COMPONENTES

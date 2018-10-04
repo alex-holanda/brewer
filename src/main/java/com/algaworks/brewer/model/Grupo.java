@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -11,9 +12,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 @Entity
 @Table(name="grupo")
@@ -27,8 +25,8 @@ public class Grupo implements Serializable {
 	
 	private String nome;
 	
-	@Fetch(FetchMode.SUBSELECT)
-	@ManyToMany
+//	@Fetch(FetchMode.SUBSELECT)
+	@ManyToMany(fetch=FetchType.LAZY)
 	@JoinTable(name = "grupo_permissao"
 			, joinColumns = @JoinColumn(name = "codigo_grupo")
 			, inverseJoinColumns = @JoinColumn(name="codigo_permissao"))
@@ -81,5 +79,10 @@ public class Grupo implements Serializable {
 		} else if (!codigo.equals(other.codigo))
 			return false;
 		return true;
+	}
+
+	@Override
+	public String toString() {
+		return "Grupo [codigo=" + codigo + ", nome=" + nome + ", permissoes=" + permissoes + "]";
 	}
 }
