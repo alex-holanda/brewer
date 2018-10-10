@@ -18,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.algaworks.brewer.dto.CervejaDTO;
 import com.algaworks.brewer.model.Cerveja;
 import com.algaworks.brewer.repository.filter.CervejaFilter;
 
@@ -116,6 +117,35 @@ public class CervejasImpl implements CervejasQueries {
 	
 	private boolean isEstiloPresente(CervejaFilter filtro) {
 		return filtro.getEstilo() != null && filtro.getEstilo().getCodigo() != null;
+	}
+
+
+	@Override
+	public List<CervejaDTO> porSkuOuNome(String skuOuNome) {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<CervejaDTO> criteria = builder.createQuery(CervejaDTO.class);
+		Root<Cerveja> root = criteria.from(Cerveja.class);
+		
+		criteria.select(builder.construct(CervejaDTO.class, 
+				root.get("codigo"), root.get("sku"), root.get("nome"), root.get("origem"),
+				root.get("valor"), root.get("foto")));
+		
+		criteria.where(builder.or(builder.like(root.get("sku"), "%" + skuOuNome + "%")
+				, builder.like(root.get("nome"), "%" + skuOuNome + "%")));
+		
+		TypedQuery<CervejaDTO> query = manager.createQuery(criteria);
+		
+		return query.getResultList();
+		
+//		String jpql = "select new com.algaworks.brewer.dto.CervejaDTO(codigo, sku, nome, origem, valor, foto) "
+//				+ "from Cerveja where sku like :skuOuNome or nome like :skuOuNome";
+//		
+//		List<CervejaDTO> cervejasFiltradas = manager.createQuery(jpql, CervejaDTO.class)
+//				.setParameter("skuOuNome", skuOuNome + "%")
+//				.getResultList();
+//		
+//		
+//		return cervejasFiltradas;
 	}
 
 }
