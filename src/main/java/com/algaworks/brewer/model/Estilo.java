@@ -71,4 +71,9 @@ public class Estilo implements Serializable {
 		return true;
 	}
 
+	@Override
+	public String toString() {
+		return "Estilo [codigo=" + codigo + ", nome=" + nome + ", cervejas=" + cervejas + "]";
+	}
+
 }

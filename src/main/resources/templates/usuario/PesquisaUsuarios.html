@@ -46,8 +46,8 @@
 					<label class="control-label">Grupo</label>
 					<div>
 						<th:bloack th:each="grupo : ${grupos}">
-							<div class="radio radio-inline" >
-								<input type="radio" th:value="${grupo.codigo}" th:field="*{grupos}"/>
+							<div class="checkbox checkbox-inline" >
+								<input type="checkbox" th:value="${grupo.codigo}" th:field="*{grupos}"/>
 								<label th:for="${#ids.prev('grupos')}" th:text="${grupo.nome}"></label>
 							</div>
 						</th:bloack>
