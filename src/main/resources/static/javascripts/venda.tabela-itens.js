@@ -4,10 +4,20 @@ Brewer.TabelaItens = (function() {
 		this.autocomplete = autocomplete;
 		this.tabelaCervejasContainer = $('.js-tabela-cervejas-container');
 		this.uuid = $('#uuid').val();
+		this.emitter = $({});
+		this.on = this.emitter.on.bind(this.emitter);
 	}
 	
 	TabelaItens.prototype.iniciar = function() {
 		this.autocomplete.on('item-selecionado', onItemSelecionado.bind(this));
+		
+		bindQuantidade.call(this);
+		
+		bindTabelaItem.call(this);
+	}
+	
+	TabelaItens.prototype.valorTotal = function() {
+		return this.tabelaCervejasContainer.data('valor');
 	}
 	
 	function onItemSelecionado(evento, item) {
@@ -28,9 +38,26 @@ Brewer.TabelaItens = (function() {
 	function onItemAtualizadoNoServidor(html) {
 		this.tabelaCervejasContainer.html(html);
 		
-		$('.js-tabela-cerveja-quantidade-item').on('change', onQuantidadeItemAlterado.bind(this));
-		$('.js-tabela-item').on('dblclick', onDoubleClick);
+		bindQuantidade.call(this);
+		
+		var tabelaItem = bindTabelaItem.call(this);
+		
+		
+		this.emitter.trigger('tabela-itens-atualizada', tabelaItem.data('valor-total'));
+	}
+	
+	function bindTabelaItem() {
+		var tabelaItem = $('.js-tabela-item');
+		tabelaItem.on('dblclick', onDoubleClick);
 		$('.js-exclusao-item-btn').on('click', onExclusaoItemClick.bind(this));
+		
+		return tabelaItem;
+	}
+	
+	function bindQuantidade() {
+		var quantidadeItemInput = $('.js-tabela-cerveja-quantidade-item');
+		quantidadeItemInput.on('change', onQuantidadeItemAlterado.bind(this));
+		quantidadeItemInput.maskMoney({ precision: 0, thousands: '' });
 	}
 	
 	function onExclusaoItemClick(evento) {
@@ -53,6 +80,12 @@ Brewer.TabelaItens = (function() {
 	function onQuantidadeItemAlterado(evento) {
 		var input = $(evento.target);
 		var quantidade = input.val();
+		
+		if (quantidade <= 0) {
+			input.val(1);
+			quantidade = 1;
+		}
+		
 		var codigoCerveja = input.data('codigo-cerveja');
 		
 		console.log('quantidade: ' , quantidade);
@@ -72,11 +105,3 @@ Brewer.TabelaItens = (function() {
 	return TabelaItens;
 	
 }());
-
-$(function() {
-	var autocomplete = new Brewer.Autocomplete();
-	autocomplete.iniciar();
-	
-	var tabelaItens = new Brewer.TabelaItens(autocomplete);
-	tabelaItens.iniciar();
-});
