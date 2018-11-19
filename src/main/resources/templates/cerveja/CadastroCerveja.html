@@ -7,7 +7,8 @@
 	layout:decorate="~{layout/LayoutPadrao}">
 
 <head>
-	<title>Cadastro de Cerveja</title>
+	<title th:if="${cerveja.nova}">Cadastro de cerveja</title>
+	<title th:unless="${cerveja.nova}" th:text="|Edição da ${cerveja.nome}|">Editar cerveja</title>
 	
 	<link rel="stylesheet" th:href="@{/stylesheets/vendors/upload.min.css}"/>
 </head>
@@ -35,7 +36,9 @@
 
 	<div class="container-fluid">
 	
-		<form method="post" th:action="@{/cervejas/novo}" th:object="${cerveja}" class="form-vertical  js-form-loading">
+		<form method="post" th:object="${cerveja}" class="form-vertical  js-form-loading"
+				th:action="${cerveja.nova} ? @{/cervejas/nova} : @{/cervejas/{codigo}(codigo=${cerveja.codigo})}" >
+			<input type="hidden" th:field="*{codigo}"/>
 			
 			<brewer:message />
 			
@@ -136,6 +139,7 @@
 				<div class="form-group col-sm-12">
 					<input type="hidden" th:field="*{foto}"/>
 					<input type="hidden" th:field="*{contentType}"/>
+					<input type="hidden" th:field="*{novaFoto}"/>
 					
 					<label class="control-label">Foto</label>
 					

@@ -15,7 +15,7 @@ public class EstiloConverter implements Converter<String, Estilo> {
 			
 			return estilo;
 		}
-		
+		System.out.println(">>>> Veio aqui");
 		return null;
 	}
 

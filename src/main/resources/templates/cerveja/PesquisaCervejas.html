@@ -4,6 +4,7 @@
 	xmlns:th="http://www.thymeleaf.org"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
 	xmlns:brewer="http://brewer.algaworks.com"
+	xmlns:data="http://www.thymeleaf.org/extras/data"
 	layout:decorate="~{layout/LayoutPadrao}">
 
 <body>
@@ -17,7 +18,7 @@
 				</div>
 				<div class="col-sm-2">
 					<div class="aw-page-header-controls">
-						<a class="btn btn-default" th:href="@{/cervejas/novo}">
+						<a class="btn btn-default" th:href="@{/cervejas/nova}">
 							<i class="glyphicon  glyphicon-plus-sign"></i> <span class="hidden-xs hidden-sm">Nova cerveja</span>
 						</a>
 					</div>
@@ -133,11 +134,14 @@
 						<td class="table-cervejas-col-valor" th:text="|R$ ${cerveja.valor}|"></td>
 						
 						<td class="table-cervejas-col-acoes">
-							<a class="btn btn-link btn-xs js-tooltip" title="Editar">
+							<a class="btn btn-link btn-xs js-tooltip" title="Editar"
+									th:href="@{/cervejas/{codigo}(codigo=${cerveja.codigo})}">
 								<i class="glyphicon glyphicon-pencil"></i>
 							</a>
 							
-							<a class="btn btn-link btn-xs js-tooltip" title="Excluir">
+							<a class="btn btn-link btn-xs js-tooltip  js-exclusao-btn" title="Excluir" href="#" 
+									data:url="@{/cervejas/{codigo}(codigo=${cerveja.codigo})}"
+									data:objeto="${cerveja.nome}">
 								<i class="glyphicon glyphicon-remove"></i>
 							</a>
 						</td>

@@ -32,7 +32,7 @@
 	<div class="container-fluid">
 		
 		<form method="post" th:action="@{/usuarios/novo}" th:object="${usuario}" class="form-vertical  js-form-loading">
-			
+			<input type="hidden" th:field="*{codigo}"/>
 			<brewer:message />
 			
 			<!-- CAMPO NOME -->
@@ -69,7 +69,7 @@
 					<input type="password" id="confirmarSenha" class="form-control" th:field="*{confirmacaoSenha}"/>
 				</div>
 				
-				<div class="col-sm-3  form-group">
+				<div class="col-sm-3  form-group" th:if="${#authentication.principal.usuario.codigo != usuario.codigo}">
 					<label>Status</label>
 					<div>
 						<div>

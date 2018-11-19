@@ -1,13 +1,11 @@
 package com.algaworks.brewer.model;
 
 import java.io.Serializable;
-import java.util.List;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.validation.constraints.Size;
 
@@ -27,9 +25,6 @@ public class Estilo implements Serializable {
 	@Size(max = 20, message = "Deve conter no máximo de 20 caracteres")
 	private String nome;
 	
-	@OneToMany(mappedBy = "estilo")
-	private List<Cerveja> cervejas;
-
 	public Long getCodigo() {
 		return codigo;
 	}
@@ -69,11 +64,6 @@ public class Estilo implements Serializable {
 		} else if (!codigo.equals(other.codigo))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "Estilo [codigo=" + codigo + ", nome=" + nome + ", cervejas=" + cervejas + "]";
 	}
 
 }

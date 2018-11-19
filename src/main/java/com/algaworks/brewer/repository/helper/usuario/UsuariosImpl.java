@@ -11,6 +11,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -52,6 +53,23 @@ public class UsuariosImpl implements UsuariosQueries {
 		
 		
 		return new PageImpl<>(query.getResultList(), pageable, total(filtro));
+	}
+	
+	@Override
+	@Transactional(readOnly = true)
+	public Usuario buscarUsuarioComGrupo(Long codigo) {
+		System.out.println(">>> Chamada do usuário com grupo");
+		
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<Usuario> criteria= builder.createQuery(Usuario.class);
+		Root<Usuario> root = criteria.from(Usuario.class);
+		root.fetch("grupos", JoinType.LEFT);
+		
+		criteria.where(builder.equal(root.get("codigo"), codigo));
+		
+		TypedQuery<Usuario> query = manager.createQuery(criteria);
+		
+		return query.getSingleResult();
 	}
 
 	private Long total(UsuarioFilter filtro) {

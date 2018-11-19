@@ -3,6 +3,7 @@ package com.algaworks.brewer.model;
 import java.io.Serializable;
 
 import javax.persistence.Embeddable;
+import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Transient;
@@ -17,7 +18,7 @@ public class Endereco implements Serializable {
 	private String complemento;
 	private String cep;
 	
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.LAZY)
 	@JoinColumn(name="codigo_cidade")
 	private Cidade cidade;
 	

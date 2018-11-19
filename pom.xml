@@ -69,6 +69,10 @@
 		
 		<!-- JUnit -->
 		<junit.version>4.12</junit.version>
+		
+		<!-- Java Mail -->
+		<javax.mail.version>1.5.6</javax.mail.version>
+		
 	</properties>
 		
 	<build>
@@ -286,6 +290,23 @@
 			<version>${junit.version}</version>
 			<scope>test</scope>
 		</dependency>
+		
+		<!-- Java Mail -->
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>${javax.mail.version}</version>
+			<scope>compile</scope>
+		</dependency>
+
+<!-- 	SendGrid Mail -->
+<!-- 		<dependency> -->
+<!-- 			<groupId>com.sendgrid</groupId> -->
+<!-- 			<artifactId>sendgrid-java</artifactId> -->
+<!-- 			<version>4.0.1</version> -->
+<!-- 			<scope>compile</scope> -->
+<!-- 		</dependency> -->
+	
 	</dependencies>
 	
 	<repositories>

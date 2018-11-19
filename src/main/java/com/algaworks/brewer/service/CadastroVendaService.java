@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +19,16 @@ public class CadastroVendaService {
 	private Vendas vendas;
 	
 	@Transactional
-	public void salvar(Venda venda) {
+	public Venda salvar(Venda venda) {
 
+		if (venda.isSalvarProibido()) {
+			throw new RuntimeException("Usuário tentando salvar uma venda proibida");
+		}
+		
 		if (venda.isNova()) {
 			venda.setDataCriacao(LocalDateTime.now());
+		} else {
+			edicaoVendaManterDataCriacao(venda);
 		}
 		
 		if (venda.getDataEntrega() != null) {
@@ -29,7 +36,7 @@ public class CadastroVendaService {
 					, venda.getHoraEntrega() != null ? venda.getHoraEntrega() : LocalTime.now()));
 		}
 		
-		vendas.save(venda);
+		return vendas.saveAndFlush(venda);
 	}
 
 	@Transactional
@@ -37,5 +44,20 @@ public class CadastroVendaService {
 		venda.setStatus(StatusVenda.EMITIDA);
 		
 		salvar(venda);
+	}
+
+	@PreAuthorize("#venda.usuario == principal.usuario or hasRole('CANCELAR_VENDA')")
+	@Transactional
+	public void cancelar(Venda venda) {
+		
+		Venda vendaExistente = vendas.findOne(venda.getCodigo());
+		
+		vendaExistente.setStatus(StatusVenda.CANCELADA);
+		vendas.save(vendaExistente);
+	}
+	
+	private void edicaoVendaManterDataCriacao(Venda venda) {
+		Venda vendaExistente = vendas.findOne(venda.getCodigo());
+		venda.setDataCriacao(vendaExistente.getDataCriacao());
 	}
 }

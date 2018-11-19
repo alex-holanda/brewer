@@ -32,13 +32,62 @@
 	</div>
 		
 	<div class="container-fluid">	
-		<form method="get" th:object="${estiloFilter}">
+		<form method="get" th:action="@{/vendas}" th:object="${vendaFilter}">
 			
+			<div class="row">
+				<div class="col-sm-6">
+					<label class="control-label" for="codigo">Código</label>
+					<input type="text" class="form-control" id="codigo" th:field="*{codigo}"/>
+				</div>
+				
+				<div class="col-sm-6">
+					<label class="control-label" for="status">Status</label>
+					<select class="form-control" th:field="*{status}">
+						<option value="">Todos os status</option>
+						<option th:each="s : ${status}" th:text="${s}" th:value="${s}"></option> 
+					</select>
+				</div>
+			</div>
 			
+			<div class="row">
+				<div class="form-group col-sm-6">
+					<label class="control-label">Data de criação</label>
+					<div class="form-inline">
+						<input type="text" class="form-control" th:field="*{desde}"/>
+						<label>até</label>
+						<input type="text" class="form-control" th:field="*{ate}"/>
+					</div>
+				</div>
+				
+				<div class="form-group col-sm-6">
+					<label class="control-label">Valor total</label>
+					<div class="form-inline">
+						<input type="text" class="form-control" th:field="*{valorMinimo}"/>
+						<label>até</label>
+						<input type="text" class="form-control" th:field="*{valorMaximo}"/>
+					</div>
+				</div>
+			</div>
+			
+			<div class="row">
+				<div class="col-sm-6">
+					<label class="control-label" for="nomeCliente">Nome cliente</label>
+					<input type="text" class="form-control" id="nomeCliente" th:field="*{nomeCliente}"/>
+				</div>
+				
+				<div class="col-sm-6">
+					<label class="control-label" for="cpfOuCnpj">CPF/CNPJ</label>
+					<input type="text" class="form-control" id="cpfOuCnpj" th:field="*{cpfOuCnpjCliente}"/>
+				</div>
+			</div>
+			
+			<br />
 			<button type="submit" class="btn  btn-primary">Pesquisar</button>
 		</form>
 		
 	</div>
+	
+	<br />
 		
 	<div class="table-responsive  bw-tabela-simples">
 		
@@ -46,19 +95,34 @@
 			
 			<thead>
 				<tr>
-					<th class="col-sm-1 text-right">
+					<th>
 						<brewer:order page="${pagina}" field="codigo" text="Código"/>
 					</th>
-					<th class="col-sm-5 text-center">
-						<brewer:order page="${pagina}" field="nome" text="Nome"/>
+					<th>
+						<brewer:order page="${pagina}" field="cliente" text="Cliente"/>
 					</th>
+					<th>Data de criação</th>
+					<th>Valor total</th>
+					<th>Vendedor</th>
+					<th>Status</th>
 					<th></th>
 				</tr>
 			</thead>
 			
 			<tbody>
 				<tr th:each="venda : ${pagina.conteudo}">
-					
+					<td th:text="${venda.codigo}"></td>
+					<td th:text="${venda.cliente.nome}"></td>
+					<td th:text="${{venda.dataCriacao}}"></td>
+					<td th:text="${{venda.valorTotal}}"></td>
+					<td th:text="${venda.usuario.nome}"></td>
+					<td th:text="${venda.status}"></td>
+					<td>
+						<a class="btn btn-link btn-xs js-tooltip" title="Editar"
+								th:href="@{/vendas/{codigo}(codigo=${venda.codigo})}">
+							<i class="glyphicon glyphicon-pencil"></i>
+						</a>
+					</td>
 				</tr>
 				
 				<tr th:if="${pagina.vazia}">

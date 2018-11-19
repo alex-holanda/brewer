@@ -25,7 +25,6 @@ public class Grupo implements Serializable {
 	
 	private String nome;
 	
-//	@Fetch(FetchMode.SUBSELECT)
 	@ManyToMany(fetch=FetchType.LAZY)
 	@JoinTable(name = "grupo_permissao"
 			, joinColumns = @JoinColumn(name = "codigo_grupo")
@@ -79,10 +78,5 @@ public class Grupo implements Serializable {
 		} else if (!codigo.equals(other.codigo))
 			return false;
 		return true;
-	}
-
-	@Override
-	public String toString() {
-		return "Grupo [codigo=" + codigo + ", nome=" + nome + ", permissoes=" + permissoes + "]";
 	}
 }
