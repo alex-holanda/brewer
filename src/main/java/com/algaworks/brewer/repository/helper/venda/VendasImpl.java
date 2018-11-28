@@ -1,7 +1,12 @@
 package com.algaworks.brewer.repository.helper.venda;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.MonthDay;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -19,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import com.algaworks.brewer.dto.VendaMes;
 import com.algaworks.brewer.model.Cliente;
 import com.algaworks.brewer.model.TipoPessoa;
 import com.algaworks.brewer.model.Venda;
@@ -28,6 +34,51 @@ public class VendasImpl implements VendasQueries {
 
 	@PersistenceContext
 	private EntityManager manager;
+	
+	@Override
+	public BigDecimal valorTotalNoAno() {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
+		Root<Venda> root = criteria.from(Venda.class);
+		
+		criteria.where(builder.equal(builder.function("YEAR", Integer.class, root.get("dataCriacao")), Year.now().getValue()));
+		
+		criteria.select(builder.sum(root.get("valorTotal")));
+		
+		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
+		
+		return Optional.ofNullable(query.getSingleResult()).orElse(BigDecimal.ZERO);
+	}
+	
+	@Override
+	public BigDecimal valorTicketMedio() {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
+		Root<Venda> root = criteria.from(Venda.class);
+		
+		criteria.where(builder.equal(builder.function("YEAR", Integer.class, root.get("dataCriacao")), Year.now().getValue()));
+		
+		criteria.multiselect(builder.avg(root.get("valorTotal")));
+		
+		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
+		
+		return Optional.ofNullable(query.getSingleResult()).orElse(BigDecimal.ZERO);
+	}
+	
+	@Override
+	public BigDecimal valorTotalNoMes() {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
+		Root<Venda> root = criteria.from(Venda.class);
+		
+		criteria.where(builder.equal(builder.function("MONTH", Integer.class, root.get("dataCriacao")), MonthDay.now().getMonthValue()));
+		
+		criteria.select(builder.sum(root.get("valorTotal")));
+		
+		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
+		
+		return Optional.ofNullable(query.getSingleResult()).orElse(BigDecimal.ZERO);
+	}
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -137,4 +188,25 @@ public class VendasImpl implements VendasQueries {
 		return predicates.toArray(new Predicate[predicates.size()]);
 	}
 
+	@Override
+	public List<VendaMes> totalPorMes() {
+		List<VendaMes> vendaMes = manager.createNamedQuery("Vendas.totalPorMes", VendaMes.class).getResultList();
+	
+		LocalDate hoje = LocalDate.now();
+		
+		for (int i = 1; i <= 6; i++) {
+			String mesIdeal = String.format("%d/%02d", hoje.getYear(), hoje.getMonthValue());
+			
+			boolean possuiMes = vendaMes.stream().filter(v -> v.getMes().equals(mesIdeal)).findAny().isPresent();
+			
+			if (!possuiMes) {
+				vendaMes.add(i -1, new VendaMes(mesIdeal, 0));
+			}
+			
+			hoje = hoje.minusMonths(1);
+		}
+		
+		return vendaMes;
+	}
+	
 }

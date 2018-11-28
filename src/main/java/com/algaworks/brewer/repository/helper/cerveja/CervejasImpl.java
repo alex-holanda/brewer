@@ -1,7 +1,9 @@
 package com.algaworks.brewer.repository.helper.cerveja;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -26,6 +28,32 @@ public class CervejasImpl implements CervejasQueries {
 
 	@PersistenceContext
 	private EntityManager manager;
+	
+	@Override
+	public Integer quantidadeItensNoEstoque() {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<Integer> criteria = builder.createQuery(Integer.class);
+		Root<Cerveja> root = criteria.from(Cerveja.class);
+		
+		criteria.select(builder.sum(root.get("quantidadeEstoque")));
+		
+		TypedQuery<Integer> query = manager.createQuery(criteria);
+		
+		return Optional.ofNullable(query.getSingleResult()).orElse(0);
+	}
+	
+	@Override
+	public BigDecimal valorTotalDoEstoque() {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
+		Root<Cerveja> root = criteria.from(Cerveja.class);
+		
+		criteria.select(builder.sum(builder.prod(root.get("quantidadeEstoque"), root.get("valor"))));
+		
+		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
+		
+		return Optional.ofNullable(query.getSingleResult()).orElse(BigDecimal.ZERO);
+	}
 	
 	@Override
 	@Transactional(readOnly = true)
@@ -147,5 +175,4 @@ public class CervejasImpl implements CervejasQueries {
 //		
 //		return cervejasFiltradas;
 	}
-
 }
