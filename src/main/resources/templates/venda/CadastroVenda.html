@@ -22,7 +22,7 @@
 		<div class="container-fluid">
 			<div class="row">
 				<div class="col-sm-10">
-					<h1 th:if="${venda.nova}">Cadastro de venda</h1>
+					<h1 th:if="${venda.nova}" th:text="#{venda.cadastro.titulo}">Cadastro de venda</h1>
 					<h1 th:unless="${venda.nova}">Editando venda nº [[${venda.codigo}]]</h1>
 				</div>
 				<div class="col-sm-2">
