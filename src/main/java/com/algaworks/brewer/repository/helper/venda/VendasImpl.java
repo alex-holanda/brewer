@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.MonthDay;
 import java.time.Year;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -206,7 +207,7 @@ public class VendasImpl implements VendasQueries {
 			hoje = hoje.minusMonths(1);
 		}
 		
-		return vendaMes;
+		return Optional.ofNullable(vendaMes).orElse(Arrays.asList());
 	}
 	
 }
