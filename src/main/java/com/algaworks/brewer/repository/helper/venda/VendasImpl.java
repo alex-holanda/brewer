@@ -14,6 +14,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -21,7 +22,6 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -29,6 +29,7 @@ import com.algaworks.brewer.dto.VendaMes;
 import com.algaworks.brewer.model.Cliente;
 import com.algaworks.brewer.model.TipoPessoa;
 import com.algaworks.brewer.model.Venda;
+import com.algaworks.brewer.model.Venda_;
 import com.algaworks.brewer.repository.filter.VendaFilter;
 
 public class VendasImpl implements VendasQueries {
@@ -42,9 +43,9 @@ public class VendasImpl implements VendasQueries {
 		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
 		Root<Venda> root = criteria.from(Venda.class);
 		
-		criteria.where(builder.equal(builder.function("YEAR", Integer.class, root.get("dataCriacao")), Year.now().getValue()));
-		
 		criteria.select(builder.sum(root.get("valorTotal")));
+		
+		criteria.where(builder.equal(builder.function("YEAR", Integer.class, root.get("dataCriacao")), Year.now().getValue()));
 		
 		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
 		
@@ -54,16 +55,18 @@ public class VendasImpl implements VendasQueries {
 	@Override
 	public BigDecimal valorTicketMedio() {
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
-		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
+		CriteriaQuery<Double> criteria = builder.createQuery(Double.class);
 		Root<Venda> root = criteria.from(Venda.class);
 		
-		criteria.where(builder.equal(builder.function("YEAR", Integer.class, root.get("dataCriacao")), Year.now().getValue()));
+		Expression<Double> avg = builder.avg(root.get(Venda_.VALOR_TOTAL));
 		
-		criteria.multiselect(builder.avg(root.get("valorTotal")));
+		criteria.select(avg);
 		
-		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
+		criteria.where(builder.equal(builder.function("YEAR", Integer.class, root.get(Venda_.DATA_CRIACAO)), Year.now().getValue()));
 		
-		return Optional.ofNullable(query.getSingleResult()).orElse(BigDecimal.ZERO);
+		TypedQuery<Double> query = manager.createQuery(criteria);
+		
+		return BigDecimal.valueOf(Optional.ofNullable(query.getSingleResult()).orElse(0D));
 	}
 	
 	@Override
@@ -72,9 +75,8 @@ public class VendasImpl implements VendasQueries {
 		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
 		Root<Venda> root = criteria.from(Venda.class);
 		
+		criteria.select(builder.sum(root.get(Venda_.VALOR_TOTAL)));
 		criteria.where(builder.equal(builder.function("MONTH", Integer.class, root.get("dataCriacao")), MonthDay.now().getMonthValue()));
-		
-		criteria.select(builder.sum(root.get("valorTotal")));
 		
 		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
 		
@@ -94,14 +96,14 @@ public class VendasImpl implements VendasQueries {
 		Predicate[] predicates = criarRestricoes(filtro, builder, root);
 		criteria.where(predicates);
 		
-		Sort sort = pageable.getSort();
-		if (sort != null) {
-			Sort.Order order = sort.iterator().next();
-			
-			String property = order.getProperty();
-			
-			criteria.orderBy(order.isAscending() ? builder.asc(root.get(property)) : builder.desc(root.get(property)));
-		}
+//		Sort sort = pageable.getSort();
+//		if (sort != null) {
+//			Sort.Order order = sort.iterator().next();
+//			
+//			String property = order.getProperty();
+//			
+//			criteria.orderBy(order.isAscending() ? builder.asc(root.get(property)) : builder.desc(root.get(property)));
+//		}
 		
 		TypedQuery<Venda> query = manager.createQuery(criteria);
 		adicionarRestricoesDePagina(query, pageable);

@@ -57,14 +57,14 @@ public class CadastroVendaService {
 	@Transactional
 	public void cancelar(Venda venda) {
 		
-		Venda vendaExistente = vendas.findOne(venda.getCodigo());
+		Venda vendaExistente = vendas.getOne(venda.getCodigo());
 		
 		vendaExistente.setStatus(StatusVenda.CANCELADA);
 		vendas.save(vendaExistente);
 	}
 	
 	private void edicaoVendaManterDataCriacao(Venda venda) {
-		Venda vendaExistente = vendas.findOne(venda.getCodigo());
+		Venda vendaExistente = vendas.getOne(venda.getCodigo());
 		venda.setDataCriacao(vendaExistente.getDataCriacao());
 	}
 }

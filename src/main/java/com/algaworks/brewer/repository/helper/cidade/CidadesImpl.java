@@ -14,7 +14,6 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -37,18 +36,9 @@ public class CidadesImpl implements CidadesQueries {
 		
 		Predicate[] predicates = criarRestricoes(filtro, builder, root);
 		
-		root.fetch(Cidade_.estado);
+		root.fetch(Cidade_.ESTADO);
 		
 		criteria.where(predicates);
-		
-		Sort sort = pageable.getSort();
-		if (sort != null) {
-			Sort.Order order = sort.iterator().next();
-			
-			String property = order.getProperty();
-			
-			criteria.orderBy(order.isAscending() ? builder.asc(root.get(property)) : builder.desc(root.get(property)));
-		}
 		
 		TypedQuery<Cidade> query = manager.createQuery(criteria);
 		
@@ -86,11 +76,11 @@ public class CidadesImpl implements CidadesQueries {
 		if ( filtro != null ) {
 			
 			if ( !StringUtils.isEmpty(filtro.getNome())) {
-				predicates.add(builder.like(root.get(Cidade_.nome), "%" + filtro.getNome() + "%"));
+				predicates.add(builder.like(root.get(Cidade_.NOME), "%" + filtro.getNome() + "%"));
 			}
 			
 			if ( filtro.getEstado() != null ) {
-				predicates.add(builder.equal(root.get("estado"), filtro.getEstado()));
+				predicates.add(builder.equal(root.get(Cidade_.ESTADO), filtro.getEstado()));
 			}
 			
 		}

@@ -3,16 +3,12 @@ package com.algaworks.brewer.config;
 import java.util.Properties;
 
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 
-import com.algaworks.brewer.mail.Mailer;
-
 @Configuration
-@ComponentScan(basePackageClasses = Mailer.class)
 @PropertySource({ "classpath:env/mail-${ambiente:local}.properties" })
 public class MailConfig {
 

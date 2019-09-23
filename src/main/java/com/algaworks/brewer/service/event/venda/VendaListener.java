@@ -18,7 +18,7 @@ public class VendaListener {
 	public void vendaEmitida(VendaEvent vendaEvent) {
 		System.out.println(">>> Evento de mudança de quantidade de itens do estoque");
 		for (ItemVenda item : vendaEvent.getVenda().getItens()) {
-			Cerveja cerveja = cervejas.findOne(item.getCerveja().getCodigo());
+			Cerveja cerveja = cervejas.getOne(item.getCerveja().getCodigo());
 			cerveja.setQuantidadeEstoque(cerveja.getQuantidadeEstoque() - item.getQuantidade());
 			cervejas.save(cerveja);
 		}

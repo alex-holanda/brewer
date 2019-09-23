@@ -16,12 +16,12 @@ import javax.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.algaworks.brewer.dto.CervejaDTO;
 import com.algaworks.brewer.model.Cerveja;
+import com.algaworks.brewer.model.Cerveja_;
 import com.algaworks.brewer.repository.filter.CervejaFilter;
 
 public class CervejasImpl implements CervejasQueries {
@@ -35,7 +35,7 @@ public class CervejasImpl implements CervejasQueries {
 		CriteriaQuery<Integer> criteria = builder.createQuery(Integer.class);
 		Root<Cerveja> root = criteria.from(Cerveja.class);
 		
-		criteria.select(builder.sum(root.get("quantidadeEstoque")));
+		criteria.select(builder.sum(root.get(Cerveja_.QUANTIDADE_ESTOQUE)));
 		
 		TypedQuery<Integer> query = manager.createQuery(criteria);
 		
@@ -48,7 +48,7 @@ public class CervejasImpl implements CervejasQueries {
 		CriteriaQuery<BigDecimal> criteria = builder.createQuery(BigDecimal.class);
 		Root<Cerveja> root = criteria.from(Cerveja.class);
 		
-		criteria.select(builder.sum(builder.prod(root.get("quantidadeEstoque"), root.get("valor"))));
+		criteria.select(builder.sum(builder.prod(root.get(Cerveja_.QUANTIDADE_ESTOQUE), root.get(Cerveja_.VALOR))));
 		
 		TypedQuery<BigDecimal> query = manager.createQuery(criteria);
 		
@@ -63,14 +63,14 @@ public class CervejasImpl implements CervejasQueries {
 		CriteriaQuery<Cerveja> criteria = builder.createQuery(Cerveja.class);
 		Root<Cerveja> root = criteria.from(Cerveja.class);
 		
-		Sort sort = pageable.getSort();
-		if (sort != null) {
-			Sort.Order order = sort.iterator().next();
-			
-			String property = order.getProperty();
-			
-			criteria.orderBy(order.isAscending() ? builder.asc(root.get(property)) : builder.desc(root.get(property)));
-		}
+//		Sort sort = pageable.getSort();
+//		if (sort != null) {
+//			Sort.Order order = sort.iterator().next();
+//			
+//			String property = order.getProperty();
+//			
+//			criteria.orderBy(order.isAscending() ? builder.asc(root.get(property)) : builder.desc(root.get(property)));
+//		}
 		
 		Predicate[] predicates = criarRestricoes(filtro, builder, root);
 		criteria.where(predicates);
@@ -82,7 +82,6 @@ public class CervejasImpl implements CervejasQueries {
 		return new PageImpl<>(query.getResultList(), pageable, total(filtro));
 	}
 
-
 	private void adicionarRestricoesDePaginacao(TypedQuery<Cerveja> query, Pageable pageable) {
 		int paginaAtual = pageable.getPageNumber();
 		int totalRegistros = pageable.getPageSize();
@@ -91,7 +90,6 @@ public class CervejasImpl implements CervejasQueries {
 		query.setFirstResult(primeiroRegistro);
 		query.setMaxResults(totalRegistros);
 	}
-
 
 	private Long total(CervejaFilter filtro) {
 		
@@ -107,37 +105,36 @@ public class CervejasImpl implements CervejasQueries {
 		return manager.createQuery(criteria).getSingleResult();
 	}
 
-
 	private Predicate[] criarRestricoes(CervejaFilter filtro, CriteriaBuilder builder, Root<Cerveja> root) {
 		
 		List<Predicate> predicates = new ArrayList<>();
 		if(filtro != null) {
 			if (!StringUtils.isEmpty(filtro.getSku())) {
-				predicates.add(builder.equal(root.get("sku"), filtro.getSku()));
+				predicates.add(builder.equal(root.get(Cerveja_.SKU), filtro.getSku()));
 			}
 			
 			if (!StringUtils.isEmpty(filtro.getNome())) {
-				predicates.add(builder.like(root.get("nome"), "%" + filtro.getNome() + "%"));
+				predicates.add(builder.like(root.get(Cerveja_.NOME), "%" + filtro.getNome() + "%"));
 			}
 			
 			if (isEstiloPresente(filtro)) {
-				predicates.add(builder.equal(root.get("estilo"), filtro.getEstilo()));
+				predicates.add(builder.equal(root.get(Cerveja_.ESTILO), filtro.getEstilo()));
 			}
 			
 			if (filtro.getSabor() != null) {
-				predicates.add(builder.equal(root.get("sabor"), filtro.getSabor()));
+				predicates.add(builder.equal(root.get(Cerveja_.SABOR), filtro.getSabor()));
 			}
 			
 			if (filtro.getOrigem() != null) {
-				predicates.add(builder.equal(root.get("origem"), filtro.getOrigem()));
+				predicates.add(builder.equal(root.get(Cerveja_.ORIGEM), filtro.getOrigem()));
 			}
 			
 			if (filtro.getValorDe() != null) {
-				predicates.add(builder.ge(root.get("valor"), filtro.getValorDe()));
+				predicates.add(builder.ge(root.get(Cerveja_.VALOR), filtro.getValorDe()));
 			}
 			
 			if (filtro.getValorAte() != null) {
-				predicates.add(builder.le(root.get("valor") , filtro.getValorAte()));
+				predicates.add(builder.le(root.get(Cerveja_.VALOR) , filtro.getValorAte()));
 			}
 		}
 		return predicates.toArray(new Predicate[predicates.size()]);
@@ -147,7 +144,6 @@ public class CervejasImpl implements CervejasQueries {
 		return filtro.getEstilo() != null && filtro.getEstilo().getCodigo() != null;
 	}
 
-
 	@Override
 	public List<CervejaDTO> porSkuOuNome(String skuOuNome) {
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
@@ -155,11 +151,11 @@ public class CervejasImpl implements CervejasQueries {
 		Root<Cerveja> root = criteria.from(Cerveja.class);
 		
 		criteria.select(builder.construct(CervejaDTO.class, 
-				root.get("codigo"), root.get("sku"), root.get("nome"), root.get("origem"),
-				root.get("valor"), root.get("foto")));
+				root.get(Cerveja_.CODIGO), root.get(Cerveja_.SKU), root.get(Cerveja_.NOME), root.get(Cerveja_.ORIGEM),
+				root.get(Cerveja_.VALOR), root.get(Cerveja_.FOTO)));
 		
-		criteria.where(builder.or(builder.like(root.get("sku"), "%" + skuOuNome + "%")
-				, builder.like(root.get("nome"), "%" + skuOuNome + "%")));
+		criteria.where(builder.or(builder.like(root.get(Cerveja_.SKU), "%" + skuOuNome + "%")
+				, builder.like(root.get(Cerveja_.NOME), "%" + skuOuNome + "%")));
 		
 		TypedQuery<CervejaDTO> query = manager.createQuery(criteria);
 		

@@ -3,7 +3,6 @@
 	xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org">
 
-<body>
 	<th:block th:fragment="order (pagina, propriedade, texto)">
 		<a th:href="${pagina.urlOrdenada(propriedade)}" th:remove="${pagina.vazia} ? tag">
 			<span th:text="${texto}"></span>
@@ -15,5 +14,4 @@
 		</a>
 	</th:block>
 
-</body>
 </html>

@@ -1,15 +1,16 @@
 package com.algaworks.brewer.repository.helper.cliente;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
 
-import org.hibernate.Criteria;
-import org.hibernate.Session;
-import org.hibernate.criterion.MatchMode;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.sql.JoinType;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,56 +18,74 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.algaworks.brewer.model.Cliente;
+import com.algaworks.brewer.model.Cliente_;
 import com.algaworks.brewer.repository.filter.ClienteFilter;
-import com.algaworks.brewer.repository.paginacao.PaginacaoUtil;
 
 public class ClientesImpl implements ClientesQueries {
 
 	@PersistenceContext
 	private EntityManager manager;
 	
-	@Autowired
-	private PaginacaoUtil paginacaoUtil;
-	
-	@SuppressWarnings("unchecked")
 	@Override
 	@Transactional(readOnly=true)
 	public Page<Cliente> filtrar(ClienteFilter filtro, Pageable pageable) {
 		
-		Criteria criteria = manager.unwrap(Session.class).createCriteria(Cliente.class);
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<Cliente> criteria = builder.createQuery(Cliente.class);
+		Root<Cliente> root = criteria.from(Cliente.class);
 		
-		paginacaoUtil.preparar(criteria, pageable);
-		adicionarFiltro(filtro, criteria);
+		root.fetch(Cliente_.ENDERECO);
 		
-		criteria.createAlias("endereco.cidade", "c", JoinType.LEFT_OUTER_JOIN);
-		criteria.createAlias("c.estado", "e", JoinType.LEFT_OUTER_JOIN);
+		Predicate[] predicates = criarRestricoes(filtro, builder, root);
 		
-		return new PageImpl<>(criteria.list(), pageable, total(filtro));
+		criteria.where(predicates);
+		
+//		criteria.createAlias("endereco.cidade", "c", JoinType.LEFT_OUTER_JOIN);
+//		criteria.createAlias("c.estado", "e", JoinType.LEFT_OUTER_JOIN);
+		
+		TypedQuery<Cliente> query = manager.createQuery(criteria);
+		
+		adicionarRestricoesDePagina(query, pageable);
+		
+		return new PageImpl<>(query.getResultList(), pageable, total(filtro));
 	}
 
 	private Long total(ClienteFilter filtro) {
+		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		CriteriaQuery<Long> criteria = builder.createQuery(Long.class);
+		Root<Cliente> root = criteria.from(Cliente.class);
 		
-		Criteria criteria = manager.unwrap(Session.class).createCriteria(Cliente.class);
+		Predicate[] predicates = criarRestricoes(filtro, builder, root);
 		
-		adicionarFiltro(filtro, criteria);
+		criteria.where(predicates);
+		criteria.select(builder.count(root));
+
+		return manager.createQuery(criteria).getSingleResult();
+	}
+	
+	private void adicionarRestricoesDePagina(TypedQuery<Cliente> query, Pageable pageable) {
+		int paginaAtual = pageable.getPageNumber();
+		int totalRegistros = pageable.getPageSize();
+		int primeiroRegistro = paginaAtual * totalRegistros;
 		
-		criteria.setProjection(Projections.rowCount());
-		return (Long) criteria.uniqueResult();
+		query.setFirstResult(primeiroRegistro);
+		query.setMaxResults(totalRegistros);
 	}
 
-	private void adicionarFiltro(ClienteFilter filtro, Criteria criteria) {
+	private Predicate[] criarRestricoes(ClienteFilter filtro, CriteriaBuilder builder, Root<Cliente> root) {
+		
+		List<Predicate> predicates = new ArrayList<>();
 		
 		if (filtro != null) {
 			if (!StringUtils.isEmpty(filtro.getNome())) {
-				criteria.add(Restrictions.ilike("nome", filtro.getNome(), MatchMode.ANYWHERE));
+				predicates.add(builder.like(root.get(Cliente_.nome), "%" + filtro.getNome() + "%"));
 			}
 			
-			if(!StringUtils.isEmpty(filtro.getCpfOuCnpj())) {
-				criteria.add(Restrictions.eq("cpfOuCnpj", filtro.getCpfOuCnpj()));
+			if (!StringUtils.isEmpty(filtro.getCpfOuCnpj())) {
+				predicates.add(builder.like(root.get(Cliente_.CPF_OU_CNPJ), "%"+ filtro.getCpfOuCnpj() +"%"));
 			}
 		}
+		
+		return predicates.toArray(new Predicate[predicates.size()]);
 	}
-	
-	
-
 }

@@ -16,11 +16,11 @@ import javax.persistence.ManyToMany;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.validator.constraints.Email;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import com.algaworks.brewer.validation.AtributoConfirmacao;
 
@@ -36,10 +36,10 @@ public class Usuario implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long codigo;
 	
-	@NotEmpty(message = "Nome é obrigatório")
+	@NotBlank(message = "Nome é obrigatório")
 	private String nome;
 	
-	@NotEmpty(message = "E-mail é obrigatório")
+	@NotBlank(message = "E-mail é obrigatório")
 	@Email(message = "E-mail inválido")
 	private String email;
 	
